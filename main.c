@@ -52,11 +52,13 @@ int new_freq_kvs(FreqKVs *ht, size_t capacity)
 
 int ht_resize(FreqKVs *ht)
 {
-	FreqKV *items = realloc(ht->items, 2*ht->cap*sizeof(FreqKV));
+	int new_cap = 2 * ht->cap;
+	FreqKV *items = realloc(ht->items, new_cap*sizeof(FreqKV));
 	if (items == NULL) {
 		return 0;
 	} else {
 		ht->items = items;
+		ht->cap = new_cap;
 		return 1;
 	}
 }
@@ -71,7 +73,7 @@ void ht_free(FreqKVs *ht)
 
 void log_freq(FreqKVs ht)
 {
-	printf("HT Count: %d\n", ht.count);
+	printf("cap: %d, length: %d\n", ht.cap, ht.count);
 	for (size_t i = 0; i < ht.count; ++i) {
 		printf("%s => %d\n", ht.items[i].key, ht.items[i].val);
 	}
@@ -84,7 +86,7 @@ int main(void)
 		return 1;
 	}
 
-	printf("cap: %d, length: %d\n", ht.cap, ht.count);
+
 	
 	const char *path = "t8.shakespeare.txt";
 	FILE *file = fopen(path, "r");

@@ -50,6 +50,18 @@ int new_freq_kvs(FreqKVs *ht, size_t capacity)
 	return 1;
 }
 
+int ht_insert(FreqKVs *ht, int at, char *key, int val)
+{
+    char *buf = malloc(strlen(key) * sizeof(char));
+	if (buf == NULL) {
+		return 0;
+	}
+	strcpy(buf, key);
+	ht->items[at].key = buf;
+	ht->items[at].val = val;
+	return 1;
+}
+
 int ht_resize(FreqKVs *ht)
 {
 	int new_cap = 2 * ht->cap;
@@ -85,8 +97,6 @@ int main(void)
 	if (!new_freq_kvs(&ht, 25)) {
 		return 1;
 	}
-
-
 	
 	const char *path = "t8.shakespeare.txt";
 	FILE *file = fopen(path, "r");
@@ -94,14 +104,12 @@ int main(void)
 	for (int i = 0; i < 5000; ++i) {
 		char word[256];
 	    if (!tokenizer(file, word)) continue;
-		/* printf("Word: %s\n", word); */
 		for (int j = 0; j < ht.cap; ++j) {
-			/* printf("Val: %d\n", ht.items[j].val); */
-			/* printf("Word: %s\n", word); */
 			if (ht.items[j].val == 0) {
-				ht.items[j].key = malloc(16*sizeof(char));
-				strcpy(ht.items[j].key, word);
-				ht.items[j].val++;
+				if (!ht_insert(&ht, j, word, ht.items[j].val + 1)) {
+					perror("ht");
+					break;
+				}
 				ht.count++;
 				break;
 			} else {

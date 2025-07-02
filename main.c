@@ -50,6 +50,17 @@ int new_freq_kvs(FreqKVs *ht, size_t capacity)
 	return 1;
 }
 
+int ht_resize(FreqKVs *ht)
+{
+	FreqKV *items = realloc(ht->items, 2*ht->cap*sizeof(FreqKV));
+	if (items == NULL) {
+		return 0;
+	} else {
+		ht->items = items;
+		return 1;
+	}
+}
+
 void log_freq(FreqKVs ht)
 {
 	printf("HT Count: %d\n", ht.count);
@@ -92,7 +103,7 @@ int main(void)
 				}
 			}
 		}
-		if (ht.count >= ht.cap) break;
+		if (ht.count >= ht.cap) ht_resize(&ht);
 	}
 
 	fclose(file);

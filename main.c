@@ -61,6 +61,14 @@ int ht_resize(FreqKVs *ht)
 	}
 }
 
+void ht_free(FreqKVs *ht)
+{
+	for (int i = 0; i < ht->count; ++i) {
+		free(ht->items[i].key);
+	}
+	free(ht->items);
+}
+
 void log_freq(FreqKVs ht)
 {
 	printf("HT Count: %d\n", ht.count);
@@ -109,6 +117,7 @@ int main(void)
 	fclose(file);
 
 	log_freq(ht);
+	ht_free(&ht);
 	return 0;
 }
 

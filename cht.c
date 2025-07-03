@@ -139,7 +139,7 @@ void log_freq(FreqKVs ht)
 	do {																\
 		if ((da)->count >= (da)->cap) {									\
 			(da)->cap = (da)->cap == 0 ? 50 : 2*(da)->cap;				\
-			(da)->items = realloc((da)->items, (da)->cap*sizeof((da)->items[0])); \
+			(da)->items = realloc((da)->items, (da)->cap*sizeof(*(da)->items)); \
 			assert((da)->items != NULL && "Not enough memory");			\
 		}																\
 		(da)->items[(da)->count++] = item;								\
@@ -198,14 +198,19 @@ void toy_analysis(FreqKVs ht, FILE *file)
 	}	
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
 	FreqKVs ht = {0};
 	if (!new_freq_kvs(&ht, 5000)) {
 		return 1;
 	}
+
+	if (argc < 2 || argc > 2) {
+		printf("Usage: cht <filename> \n");
+		return 1;
+	}
 	
-	const char *path = "t8.shakespeare.txt";
+	const char *path = argv[1];
 	FILE *file = fopen(path, "r");
 
 	char token[256];

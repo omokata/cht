@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <limits.h>
+#include <assert.h>
 
 int tokenizer(FILE *stream, char word[])
 {
@@ -134,31 +135,39 @@ void log_freq(FreqKVs ht)
 	}
 }
 
+#define da_append(da, item)												\
+	do {																\
+		if ((da)->count >= (da)->cap) {									\
+			(da)->cap = (da)->cap == 0 ? 50 : 2*(da)->cap;				\
+			(da)->items = realloc((da)->items, (da)->cap*sizeof((da)->items[0])); \
+			assert((da)->items != NULL && "Not enough memory");			\
+		}																\
+		(da)->items[(da)->count++] = item;								\
+	} while(0)															\
+
+
+int compare_freq_kv_reverse(const void *p1, const void *p2)
+{
+	const FreqKV *p1kv = p1;
+	const FreqKV *p2kv = p2;
+
+	return (int)p2kv->val - (int)p1kv->val;
+}
+
 void top_10_freq(FreqKVs ht)
 {
 	printf("cap: %d, length: %d\n", ht.cap, ht.count);
-	FreqKV item[10] = {0};
-	size_t max = 0;
-	int j = 0;
-	for (size_t i = 0; i < ht.cap; ++i) {
-		/* printf("%s => %d\n", ht.items[i].key, ht.items[i].val); */
-		/* printf("%d > %d: %d\n", ht.items[i].val, max, (ht.items[i].val > max));		 */
-		if (ht.items[i].val > max) {
-			max = ht.items[i].val;
-			FreqKV kv = {
-				.key = ht.items[i].key,
-				.val = ht.items[i].val,
-				.occupied = true,
-			};
-			item[j] = kv;
-			j++;
-			if (j >= 10) {
-				break;
-			}
-		}
-	}
-	for (int i = 9; i >= 0; --i) {
-		printf("%s => %d\n", item[i].key, item[i].val);
+    FreqKVs freq = {0};
+    for (size_t i = 0; i < ht.cap; ++i) {
+        if (ht.items[i].occupied) {
+            da_append(&freq, ht.items[i]);
+        }
+    }
+
+	qsort(freq.items, freq.count, sizeof(ht.items[0]), compare_freq_kv_reverse);
+
+	for (size_t i = 0; i < 10; ++i) {
+		printf("%s => %d\n", freq.items[i].key, freq.items[i].val);
 	}
 }
 
@@ -192,11 +201,11 @@ void toy_analysis(FreqKVs ht, FILE *file)
 int main(void)
 {
 	FreqKVs ht = {0};
-	if (!new_freq_kvs(&ht, 1000)) {
+	if (!new_freq_kvs(&ht, 5000)) {
 		return 1;
 	}
 	
-	const char *path = "shakespear-smol.txt";
+	const char *path = "t8.shakespeare.txt";
 	FILE *file = fopen(path, "r");
 
 	char token[256];

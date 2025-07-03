@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <limits.h>
 
 int tokenizer(FILE *stream, char word[])
 {
@@ -136,8 +137,28 @@ void log_freq(FreqKVs ht)
 void top_10_freq(FreqKVs ht)
 {
 	printf("cap: %d, length: %d\n", ht.cap, ht.count);
-	for (size_t i = 0; i < ht.count; ++i) {
-		printf("%s => %d\n", ht.items[i].key, ht.items[i].val);
+	FreqKV item[10] = {0};
+	size_t max = 0;
+	int j = 0;
+	for (size_t i = 0; i < ht.cap; ++i) {
+		/* printf("%s => %d\n", ht.items[i].key, ht.items[i].val); */
+		/* printf("%d > %d: %d\n", ht.items[i].val, max, (ht.items[i].val > max));		 */
+		if (ht.items[i].val > max) {
+			max = ht.items[i].val;
+			FreqKV kv = {
+				.key = ht.items[i].key,
+				.val = ht.items[i].val,
+				.occupied = true,
+			};
+			item[j] = kv;
+			j++;
+			if (j >= 10) {
+				break;
+			}
+		}
+	}
+	for (int i = 9; i >= 0; --i) {
+		printf("%s => %d\n", item[i].key, item[i].val);
 	}
 }
 
@@ -217,7 +238,8 @@ int main(void)
 	
 	fclose(file);
 
-	log_freq(ht);
+	/* log_freq(ht); */
+	top_10_freq(ht);
 	ht_free(&ht);
 	return 0;
 }

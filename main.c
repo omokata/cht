@@ -164,7 +164,7 @@ void toy_analysis(FreqKVs ht, FILE *file)
 				}
 			}
 		}
-		if (ht.count >= ht.cap) ht_resize(&ht);
+		/* if (ht.count >= ht.cap) ht_resize(&ht); NOTE: RESIZE NOT WORKING ANYMORE */
 	}	
 }
 
